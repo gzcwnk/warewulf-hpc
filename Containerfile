@@ -186,9 +186,9 @@ RUN systemctl unmask \
 COPY munge.key  /etc/munge/
 RUN chown munge: /etc/munge/munge.key
 #CMD munge start
-CMD systemctl start munge
+CMD systemctl enable munge
 #CMD slurmd start
-CMD systemctl start slurmd
+CMD systemctl enable slurmd
 
 COPY excludes /etc/warewulf/
 COPY container_exit.sh /etc/warewulf/
