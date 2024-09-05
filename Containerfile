@@ -2,6 +2,9 @@ FROM ghcr.io/warewulf/warewulf-rockylinux:8
 RUN echo "assumeyes=1" >> /etc/yum.conf
 RUN yum install -y epel-release
 RUN dnf config-manager --set-enabled powertools 
+ADD /ignition-2.19.0-2.el8.x86_64.rpm /ignition-2.19.0-2.el8.x86_64.rpm
+RUN yum install -y ignition-2.19.0-2.el8.x86_64.rpm
+
 RUN dnf update -y \
     && dnf install -y --allowerasing \
       #nmap \
@@ -150,8 +153,8 @@ RUN dnf update -y \
     udunits2 \
     udunits2-devel \
     lapack \
-    xorg-x11-server-Xvfb \
-    xorg-x11-server-devel \
+#    xorg-x11-server-Xvfb \
+#    xorg-x11-server-devel \
     xterm \
     xz-devel \
     yum-utils \
@@ -173,6 +176,10 @@ RUN dnf update -y \
     valgrind \
     Lmod \
     libnsl \
+    #ignition \
+    gdisk \
+    open-vm-tools \
+    
     && dnf clean all
 
 RUN systemctl unmask \
@@ -185,10 +192,8 @@ RUN systemctl unmask \
 
 COPY munge.key  /etc/munge/
 RUN chown munge: /etc/munge/munge.key
-#CMD munge start
-CMD systemctl enable munge
-#CMD slurmd start
-CMD systemctl enable slurmd
+RUN ln -s /usr/lib/systemd/system/munge.service /etc/systemd/system/multi-user.target.wants/munge.service
+RUN ln -s /usr/lib/systemd/system/slurmd /etc/systemd/system/multi-user.target.wants/slurmd.service
 
 COPY excludes /etc/warewulf/
 COPY container_exit.sh /etc/warewulf/
@@ -198,4 +203,5 @@ CMD [ "/bin/echo", "-e", \
       "\nprovisioning system.", \
       "\n", \
       "\nFor more information about Warewulf, visit https://warewulf.org" ]
+
 
